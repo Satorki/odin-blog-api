@@ -17,8 +17,10 @@ app.set("views", __dirname + "/views");
 // routes start
 const mainRoute = require("./routes/index");
 const userRoute = require("./routes/user");
+const postRoute = require("./routes/post");
 app.use("/", mainRoute);
 app.use("/user", userRoute);
+app.use("/post", postRoute);
 
 // app start
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
