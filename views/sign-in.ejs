@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include("head"); %>
+  <body class="container">
+    <%- include("header"); %>
+    <main class="jumbotron">
+      <h1 class="display-4">Welcome to the Odin Blog API</h1>
+      <p class="lead">Sign In to your account</p>
+      <hr class="my-4" />
+      <div class="d-flex justify-content-center">
+        <div class="col-md-4">
+          <form class="form-signin" action="/sign-in" method="POST">
+            <h2 class="form-signin-heading">Please sign in</h2>
+            <label for="name" class="sr-only">Name</label>
+            <input
+              type="name"
+              id="name"
+              name="name"
+              class="form-control"
+              placeholder="name"
+              required
+              autofocus
+            />
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input
+              type="password"
+              id="inputPassword"
+              name="password"
+              class="form-control"
+              placeholder="Password"
+              required
+            />
+            <button class="btn btn-lg btn-primary btn-block" type="submit">
+              Sign in
+            </button>
+          </form>
+        </div>
+      </div>
+    </main>
+    <footer><%- include("footer"); %></footer>
+  </body>
+</html>
