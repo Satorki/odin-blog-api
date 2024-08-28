@@ -6,6 +6,13 @@ const prisma = new PrismaClient();
 // GET add post.
 router.get("/post-add", async (req, res) => {
   try {
+    // const deleteUsers = await prisma.user.deleteMany(
+    //   {
+    //     where: {
+    //       name: "sk",
+    //     },
+    //   }
+    // );
     const checkUsers = await prisma.user.findMany();
     const checkPosts = await prisma.post.findMany();
     console.log(checkUsers);
