@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const bcrypt = require("bcrypt");
 
 // GET sing in.
 router.get("/sign-in", (req, res) => {
@@ -23,8 +24,8 @@ router.post("/sign-up", async (req, res) => {
   try {
     await prisma.user.create({
       data: {
-        name: req.body.name,
-        password: req.body.password,
+        name: req.body.userName,
+        password: await bcrypt.hash(req.body.password, 10),
       },
     });
     res.redirect("/");
