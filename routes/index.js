@@ -5,9 +5,15 @@ require("dotenv").config();
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
+  console.log(authHeader);
+  
   const token = authHeader && authHeader.split(" ")[1];
+  console.log(token);
+  
+
+
   if (token == null) {
-    req.user = null; // User is not logged in
+    req.user = null;
     return next(); // Proceed without blocking
   }
   jwt.verify(token, process.env.JWT_ACCES_SECRET, (err, user) => {
@@ -22,7 +28,9 @@ function authenticateToken(req, res, next) {
 
 // GET home page.
 router.get("/", authenticateToken, (req, res) => {
-  res.render("index", { logged: !!req.user });
+  console.log(req.user);
+
+  res.render("index", { user: req.user });
 });
 
 module.exports = router;

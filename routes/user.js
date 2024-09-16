@@ -9,59 +9,56 @@ function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
   if (token == null) {
-    req.user = null; // User is not logged in
-    return next(); // Proceed without blocking
+    req.user = null;
+    return next();
   }
   jwt.verify(token, process.env.JWT_ACCES_SECRET, (err, user) => {
     if (err) {
-      req.user = null; // Invalid token
-      return next(); // Proceed without blocking
+      req.user = null;
+      return next();
     }
-    req.user = user; // Valid token
+    req.user = user;
     next();
   });
 }
 
-
-// GET sing in.
+// GET sign in.
 router.get("/sign-in", authenticateToken, (req, res) => {
   res.render("sign-in", { user: req.user });
 });
 
-// POST sing in.
+// POST sign in.
 router.post("/sign-in", async (req, res) => {
+  const { name, password } = req.body;
   try {
     const user = await prisma.user.findUnique({
-      where: {
-        name: req.body.userName,
-      },
+      where: { name: name },
     });
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-    const validPassword = await bcrypt.compare(
-      req.body.password,
-      user.password
-    );
+
+    const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid password" });
     }
+
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_ACCES_SECRET, {
+      expiresIn: "1h",
+    });
+    res.json({ token });
+    res.redirect("/");
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-
-  //const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCES_SECRET);
-
-  // res.cookie("token", token, { httpOnly: true });
-  res.redirect("/");
 });
 
-// GET sing up.
-router.get("/sign-up", (req, res) => {
-  res.render("sign-up");
+// GET sign up.
+router.get("/sign-up", authenticateToken, (req, res) => {
+  res.render("sign-up", { user: req.user });
 });
 
-// POST sing up.
+// POST sign up.
 router.post("/sign-up", async (req, res) => {
   try {
     const adminCode = process.env.ADMINCODE;
