@@ -2,10 +2,11 @@ const express = require("express");
 const router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 function authenticateToken(req, res, next) {
   const token = req.cookies.token;
-  console.log(token);
 
   if (!token) {
     req.user = null;
@@ -25,6 +26,22 @@ function authenticateToken(req, res, next) {
 // GET add post.
 router.get("/post-add", authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.render("post-add", {
+        user: null,
+      });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: req.user?.userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.render("post-add", { user: user.name });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
     // await prisma.user.deleteMany({
     //   where: {
     //     OR: [
@@ -33,18 +50,11 @@ router.get("/post-add", authenticateToken, async (req, res) => {
     //     ],
     //   },
     // });
-    const checkUsers = await prisma.user.findMany();
-    const checkPosts = await prisma.post.findMany();
-    console.log(checkUsers);
-    console.log(checkPosts);
+    // const checkUsers = await prisma.user.findMany();
+    // const checkPosts = await prisma.post.findMany();
+    // console.log(checkUsers);
+    // console.log(checkPosts);
 
-    res.render("post-add", {
-      user: req.user,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Something went wrong");
-  }
 });
 
 // POST add post.

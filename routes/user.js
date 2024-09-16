@@ -8,7 +8,6 @@ require("dotenv").config();
 
 function authenticateToken(req, res, next) {
   const token = req.cookies.token;
-  console.log(token);
 
   if (!token) {
     req.user = null;
@@ -28,6 +27,11 @@ function authenticateToken(req, res, next) {
 // GET sign in.
 router.get("/sign-in", authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.render("sign-in", {
+        user: null,
+      });
+    }
     const user = await prisma.user.findUnique({
       where: { id: req.user?.userId },
     });
@@ -74,6 +78,11 @@ router.post("/sign-in", async (req, res) => {
 // GET sign up.
 router.get("/sign-up", authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.render("sign-up", {
+        user: null,
+      });
+    }
     const user = await prisma.user.findUnique({
       where: { id: req.user?.userId },
     });
