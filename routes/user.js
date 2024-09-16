@@ -5,13 +5,16 @@ const prisma = new PrismaClient();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (token == null) {
+  const token = req.cookies.token;
+  console.log(token);
+
+  if (!token) {
     req.user = null;
-    return next();
+    return next(); // Brak tokena, przejście dalej
   }
+
   jwt.verify(token, process.env.JWT_ACCES_SECRET, (err, user) => {
     if (err) {
       req.user = null;
@@ -23,8 +26,19 @@ function authenticateToken(req, res, next) {
 }
 
 // GET sign in.
-router.get("/sign-in", authenticateToken, (req, res) => {
-  res.render("sign-in", { user: req.user });
+router.get("/sign-in", authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user?.userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.render("sign-in", { user: user.name });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // POST sign in.
@@ -46,7 +60,11 @@ router.post("/sign-in", async (req, res) => {
     const token = jwt.sign({ userId: user.id }, process.env.JWT_ACCES_SECRET, {
       expiresIn: "1h",
     });
-    res.json({ token });
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+    });
     res.redirect("/");
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -54,8 +72,19 @@ router.post("/sign-in", async (req, res) => {
 });
 
 // GET sign up.
-router.get("/sign-up", authenticateToken, (req, res) => {
-  res.render("sign-up", { user: req.user });
+router.get("/sign-up", authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user?.userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.render("sign-up", { user: user.name });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // POST sign up.
@@ -82,6 +111,12 @@ router.post("/sign-up", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+// GET sign out.
+router.get("/sign-out", (req, res) => {
+  res.clearCookie("token");
+  res.redirect("/");
 });
 
 module.exports = router;

@@ -1,6 +1,7 @@
 // express start
 const express = require("express");
 const app = express();
+const cookieParser = require("cookie-parser");
 
 // dotenv start
 require("dotenv").config();
@@ -9,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 // middleware start
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // ejs start
 app.set("view engine", "ejs");

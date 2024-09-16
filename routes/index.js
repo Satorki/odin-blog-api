@@ -1,36 +1,49 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 require("dotenv").config();
 
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  console.log(authHeader);
-  
-  const token = authHeader && authHeader.split(" ")[1];
+  const token = req.cookies.token;
   console.log(token);
-  
 
-
-  if (token == null) {
+  if (!token) {
     req.user = null;
-    return next(); // Proceed without blocking
+    return next(); // Brak tokena, przejście dalej
   }
+
   jwt.verify(token, process.env.JWT_ACCES_SECRET, (err, user) => {
     if (err) {
-      req.user = null; // Invalid token
-      return next(); // Proceed without blocking
+      req.user = null;
+      return next();
     }
-    req.user = user; // Valid token
+    req.user = user;
     next();
   });
 }
 
 // GET home page.
-router.get("/", authenticateToken, (req, res) => {
-  console.log(req.user);
+router.get("/", authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user?.userId },
+    });
 
-  res.render("index", { user: req.user });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.render("index", {
+      user: user ? user.name : "Not logged",
+    });
+    
+  } catch (error) {
+
+    res.status(500).json({ error: error.message });
+  }
+
 });
 
 module.exports = router;

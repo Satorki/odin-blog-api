@@ -26,9 +26,10 @@
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
         <% if (user) { %>
-        <p class="nav-link">Logged as: <%= user %></p>
+        <a class="nav-link">Logged as: <%= user %></a>
+        <a class="nav-link" href="/user/sign-out">Sign Out</a>
         <% } else { %>
-        <p class="nav-link">Not logged</p>
+        <a class="nav-link">Not logged</a>
         <% } %>
       </li>
     </ul>

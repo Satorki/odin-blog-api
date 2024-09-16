@@ -4,12 +4,14 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (token == null) {
+  const token = req.cookies.token;
+  console.log(token);
+
+  if (!token) {
     req.user = null;
-    return next();
+    return next(); // Brak tokena, przejście dalej
   }
+
   jwt.verify(token, process.env.JWT_ACCES_SECRET, (err, user) => {
     if (err) {
       req.user = null;
