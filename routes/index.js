@@ -26,9 +26,15 @@ function authenticateToken(req, res, next) {
 // GET home page.
 router.get("/", authenticateToken, async (req, res) => {
   try {
+    const posts = await prisma.post.findMany({
+      include: {
+        author: true,
+      },
+    });
     if (!req.user) {
       return res.render("index", {
         user: null,
+        posts: posts,
       });
     }
     const user = await prisma.user.findUnique({
@@ -41,6 +47,7 @@ router.get("/", authenticateToken, async (req, res) => {
 
     res.render("index", {
       user: user.name,
+      posts: posts,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -11,7 +11,7 @@ function authenticateToken(req, res, next) {
 
   if (!token) {
     req.user = null;
-    return next(); // Brak tokena, przejście dalej
+    return next();
   }
 
   jwt.verify(token, process.env.JWT_ACCES_SECRET, (err, user) => {

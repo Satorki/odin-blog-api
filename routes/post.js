@@ -42,24 +42,44 @@ router.get("/post-add", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-    // await prisma.user.deleteMany({
-    //   where: {
-    //     OR: [
-    //       { name: "sk" },
-    //       { name: "ss" },
-    //     ],
-    //   },
-    // });
-    // const checkUsers = await prisma.user.findMany();
-    // const checkPosts = await prisma.post.findMany();
-    // console.log(checkUsers);
-    // console.log(checkPosts);
-
+  // await prisma.user.deleteMany({
+  //   where: {
+  //     OR: [
+  //       { name: "sk" },
+  //       { name: "ss" },
+  //     ],
+  //   },
+  // });
+  // const checkUsers = await prisma.user.findMany();
+  // const checkPosts = await prisma.post.findMany();
+  // console.log(checkUsers);
+  // console.log(checkPosts);
 });
 
 // POST add post.
-router.post("/post-add", (req, res) => {
-  res.redirect("/");
+router.post("/create", authenticateToken, async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: req.user?.userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const post = await prisma.post.create({
+      data: {
+        title: req.body.title,
+        content: req.body.content,
+        authorId: user.id,
+      },
+    });
+    res.redirect("/");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // GET edit post.
