@@ -83,13 +83,55 @@ router.post("/create", authenticateToken, async (req, res) => {
 });
 
 // GET edit post.
-router.get("/post-edit", (req, res) => {
-  res.render("post-edit");
+router.get("/post-edit/:id", authenticateToken, async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.render("index", {
+        user: null,
+      });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: req.user?.userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const post = await prisma.post.findUnique({
+      where: { id: Number(req.params.id) },
+    });
+    res.render("post-edit", { user: user.name, post: post });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // POST edit post.
-router.post("/post-edit", (req, res) => {
-  res.redirect("/");
+router.post("/post-edit/:id", authenticateToken, async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.render("index", {
+        user: null,
+      });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: req.user?.userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const post = await prisma.post.update({
+      where: { id: Number(req.params.id) },
+      data: {
+        title: req.body.title,
+        content: req.body.content,
+      },
+    });
+    res.redirect("/");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 module.exports = router;

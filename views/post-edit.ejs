@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include("head"); %>
+  <body class="container">
+    <%- include("header"); %>
+    <main class="jumbotron">
+      <h1 class="display-4">Welcome to the Odin Blog API</h1>
+      <p class="lead">Edit a post</p>
+      <hr class="my-4" />
+      <div class="d-flex justify-content-center">
+        <div class="col-md-4">
+          <form
+            class="form-signin"
+            action="/post/post-edit/<%= post.id %>"
+            method="POST"
+          >
+            <h2 class="form-signin-heading">Edit a post:</h2>
+            <label for="title" class="sr-only">Title</label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              class="form-control"
+              placeholder="title"
+              value="<%= post.title %>"
+              required
+              autofocus
+            />
+            <label for="content" class="sr-only">Content</label>
+            <textarea
+              id="content"
+              name="content"
+              class="form-control mb-2"
+              placeholder="content"
+              rows="5"
+              required
+              autofocus
+            >
+<%= post.content %>
+</textarea
+            >
+            <button class="btn btn-lg btn-primary btn-block" type="submit">
+              Update
+            </button>
+            <button
+              class="btn btn-lg btn-danger btn-block"
+              type="submit"
+              formaction="/post/post-delete/<%= post.id %>"
+              formmethod="POST"
+            >
+              Delete
+            </button>
+          </form>
+        </div>
+      </div>
+    </main>
+    <footer><%- include("footer"); %></footer>
+  </body>
+</html>
