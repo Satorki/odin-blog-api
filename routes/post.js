@@ -42,18 +42,6 @@ router.get("/post-add", authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-  // await prisma.user.deleteMany({
-  //   where: {
-  //     OR: [
-  //       { name: "sk" },
-  //       { name: "ss" },
-  //     ],
-  //   },
-  // });
-  // const checkUsers = await prisma.user.findMany();
-  // const checkPosts = await prisma.post.findMany();
-  // console.log(checkUsers);
-  // console.log(checkPosts);
 });
 
 // POST add post.
@@ -127,7 +115,7 @@ router.post("/post-edit/:id", authenticateToken, async (req, res) => {
     });
 
     if (!user.isAdmin && post.authorId !== user.id) {
-      return res.status(404).json({ error: "User not premitted" });
+      return res.status(404).json({ error: "User not permitted" });
     }
 
     const postUpdate = await prisma.post.update({
@@ -162,7 +150,7 @@ router.post("/post-delete/:id", authenticateToken, async (req, res) => {
       where: { id: Number(req.params.id) },
     });
     if (!user.isAdmin && post.authorId !== user.id) {
-      return res.status(404).json({ error: "User not premitted" });
+      return res.status(404).json({ error: "User not permitted" });
     }
     const postDelete = await prisma.post.delete({
       where: { id: Number(req.params.id) },
