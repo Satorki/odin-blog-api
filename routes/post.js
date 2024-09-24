@@ -86,10 +86,9 @@ router.post("/create", authenticateToken, async (req, res) => {
 router.get("/post-edit/:id", authenticateToken, async (req, res) => {
   try {
     if (!req.user) {
-      return res.render("index", {
-        user: null,
-      });
+      return res.status(404).json({ error: "User not found" });
     }
+
     const user = await prisma.user.findUnique({
       where: { id: req.user?.userId },
     });
@@ -100,6 +99,7 @@ router.get("/post-edit/:id", authenticateToken, async (req, res) => {
     const post = await prisma.post.findUnique({
       where: { id: Number(req.params.id) },
     });
+
     res.render("post-edit", { user: user.name, post: post });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -121,12 +121,51 @@ router.post("/post-edit/:id", authenticateToken, async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    const post = await prisma.post.update({
+
+    const post = await prisma.post.findUnique({
+      where: { id: Number(req.params.id) },
+    });
+
+    if (!user.isAdmin && post.authorId !== user.id) {
+      return res.status(404).json({ error: "User not premitted" });
+    }
+
+    const postUpdate = await prisma.post.update({
       where: { id: Number(req.params.id) },
       data: {
         title: req.body.title,
         content: req.body.content,
       },
+    });
+    res.redirect("/");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST delete post.
+router.post("/post-delete/:id", authenticateToken, async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.render("index", {
+        user: null,
+      });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: req.user?.userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const post = await prisma.post.findUnique({
+      where: { id: Number(req.params.id) },
+    });
+    if (!user.isAdmin && post.authorId !== user.id) {
+      return res.status(404).json({ error: "User not premitted" });
+    }
+    const postDelete = await prisma.post.delete({
+      where: { id: Number(req.params.id) },
     });
     res.redirect("/");
   } catch (error) {
